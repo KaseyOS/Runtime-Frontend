@@ -1,24 +1,30 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import data from "./functions.json";
-
-interface FunctionData {
+export interface FunctionData {
   define: string;
   blueprint: string;
   description: string;
   parameters: object;
   implementation: object;
   returns: object;
-  tests: object;
+  tests: { [key: string]: Test };
 }
 
-interface CategorizedFunctions {
+export interface Test {
+  description: string;
+  input: { [key: string]: any };
+  expected: any;
+}
+
+export interface CategorizedFunctions {
   [type: string]: string[];
 }
 
 export const getCategorizedFunctions = (): CategorizedFunctions => {
   const categorizedFunctions: CategorizedFunctions = {};
 
-  (data as FunctionData[]).forEach((func) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (data as unknown as FunctionData[]).forEach((func) => {
     const [_, type, name] = func.define.split(".");
     if (!categorizedFunctions[type]) {
       categorizedFunctions[type] = [];
@@ -30,5 +36,5 @@ export const getCategorizedFunctions = (): CategorizedFunctions => {
 };
 
 export const getData = (): FunctionData[] => {
-  return data as FunctionData[];
+  return data as unknown as FunctionData[];
 };

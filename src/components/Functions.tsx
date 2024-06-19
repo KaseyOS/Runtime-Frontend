@@ -8,13 +8,14 @@ import {
   Input,
   Button,
 } from "@chakra-ui/react";
-import { getCategorizedFunctions, getData } from "../lib/utils";
+import { getCategorizedFunctions, getData, Test } from "../lib/utils";
 
 const Functions: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFunction, setSelectedFunction] = useState<{
     name: string;
     description: string;
+    examples: string[];
   } | null>(null);
   const categorizedFunctions = getCategorizedFunctions();
   const data = getData();
@@ -23,8 +24,27 @@ const Functions: React.FC = () => {
     setSearchQuery(e.target.value);
   };
 
-  const handleFunctionClick = (name: string, description: string) => {
-    setSelectedFunction({ name, description });
+  const handleFunctionClick = (
+    name: string,
+    description: string,
+    examples: string[]
+  ) => {
+    setSelectedFunction({ name, description, examples });
+  };
+
+  const createExamples = (
+    functionName: string,
+    tests: { [key: string]: Test } | undefined
+  ): string[] => {
+    if (!tests) return [];
+
+    return Object.keys(tests).map((key) => {
+      const test = tests[key];
+      const inputs = Object.values(test.input)
+        .map((input) => JSON.stringify(input))
+        .join(", ");
+      return `${functionName}(${inputs}) => ${test.expected}`;
+    });
   };
 
   const filteredFunctions = Object.keys(categorizedFunctions).reduce(
@@ -41,7 +61,7 @@ const Functions: React.FC = () => {
   );
 
   return (
-    <VStack spacing={0} align="stretch" height="150vh">
+    <VStack spacing={0} align="stretch" height="100vh">
       <Box bg="black" color="white" textAlign="center" p={2} fontSize="lg">
         <Input
           placeholder="Search functions..."
@@ -55,30 +75,26 @@ const Functions: React.FC = () => {
         />
       </Box>
       <HStack spacing={0} bg="gray.700" color="white" textAlign="center">
-        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
-          Math
-        </Box>
-        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
-          String
-        </Box>
-        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
-          Number
-        </Box>
-        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
-          Object
-        </Box>
-        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
-          List
-        </Box>
-        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
-          Logical
-        </Box>
-        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
-          Dictionary
-        </Box>
-        <Box flex="1" p={3} px={5}>
-          Date
-        </Box>
+        {[
+          "Math",
+          "String",
+          "Number",
+          "Object",
+          "List",
+          "Logical",
+          "Dictionary",
+          "Date",
+        ].map((category, index) => (
+          <Box
+            key={category}
+            flex="1"
+            p={3}
+            px={5}
+            borderRight={index !== 7 ? "1px solid #444" : "none"}
+          >
+            {category}
+          </Box>
+        ))}
       </HStack>
       <HStack flex="1" spacing={0} align="stretch">
         <VStack
@@ -102,6 +118,10 @@ const Functions: React.FC = () => {
                     (func) => func.define.split(".").pop() === name
                   );
 
+                  const examples = functionData
+                    ? createExamples(name, functionData.tests)
+                    : [];
+
                   return (
                     <Box
                       key={name}
@@ -111,7 +131,8 @@ const Functions: React.FC = () => {
                       onClick={() =>
                         handleFunctionClick(
                           name,
-                          functionData?.description || ""
+                          functionData?.description || "",
+                          examples
                         )
                       }
                     >
@@ -141,9 +162,15 @@ const Functions: React.FC = () => {
           </Text>
           <Text>{selectedFunction ? selectedFunction.description : ""}</Text>
           <Divider borderColor="gray.600" />
-          <Text>Examples</Text>
+          <Text fontWeight="bold">Examples</Text>
+          {selectedFunction ? (
+            selectedFunction.examples.map((example, index) => (
+              <Text key={index}>{example}</Text>
+            ))
+          ) : (
+            <Text>No examples available.</Text>
+          )}
           <Divider borderColor="gray.600" />
-          <Text>Release notes</Text>
           <Button
             bg="gray.600"
             color="white"

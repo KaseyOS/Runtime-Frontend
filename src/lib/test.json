@@ -1,0 +1,422 @@
+[
+  {
+    "define": "_functions.Math.Abs",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Calculates the absolute value of a number.",
+    "parameters": {
+      "number": {
+        "type": "_types.Number",
+        "description": "The number to calculate the absolute value of."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "return Math.abs($$args.number);\n"
+      }
+    },
+    "returns": {
+      "type": "_types.Number",
+      "description": "The absolute value of the number."
+    },
+    "tests": {
+      "absPositive": {
+        "description": "Calculate the absolute value of a positive number.",
+        "input": {
+          "number": 5
+        },
+        "expected": 5
+      },
+      "absNegative": {
+        "description": "Calculate the absolute value of a negative number.",
+        "input": {
+          "number": -5
+        },
+        "expected": 5
+      },
+      "absZero": {
+        "description": "Calculate the absolute value of zero.",
+        "input": {
+          "number": 0
+        },
+        "expected": 0
+      }
+    }
+  },
+  {
+    "define": "_functions.Date.AddDuration",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Adds a given duration to an input date.",
+    "parameters": {
+      "startDate": {
+        "type": "_types.Date",
+        "description": "The starting date to add the duration from."
+      },
+      "duration": {
+        "type": "_types.Number",
+        "description": "The duration in seconds to add to the starting date."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "const startDate = new Date($$args.startDate);\nconst durationInMilliseconds = $$args.duration * 1000;\nreturn new Date(startDate.getTime() + durationInMilliseconds).toString();\n"
+      }
+    },
+    "returns": {
+      "type": "_types.Date",
+      "description": "The resulting date after adding the given duration."
+    },
+    "tests": {
+      "addDurationOneDay": {
+        "description": "Add one day (86400 seconds) to a starting date.",
+        "input": {
+          "startDate": "2022-01-01T00:00:00.000Z",
+          "duration": 86400
+        },
+        "expected": "Sun Jan 02 2022 00:00:00 GMT+0000 (Coordinated Universal Time)"
+      },
+      "addDurationOneHour": {
+        "description": "Add one hour (3600 seconds) to a starting date.",
+        "input": {
+          "startDate": "2022-01-01T12:00:00.000Z",
+          "duration": 3600
+        },
+        "expected": "Sat Jan 01 2022 13:00:00 GMT+0000 (Coordinated Universal Time)"
+      },
+      "addDurationOneMinute": {
+        "description": "Add one minute (60 seconds) to a starting date.",
+        "input": {
+          "startDate": "2022-01-01T12:30:00.000Z",
+          "duration": 60
+        },
+        "expected": "Sat Jan 01 2022 12:31:00 GMT+0000 (Coordinated Universal Time)"
+      }
+    }
+  },
+  {
+    "define": "_functions.Logical.And",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Returns the logical AND of two boolean values.",
+    "parameters": {
+      "a": {
+        "type": "_types.Boolean",
+        "description": "The first boolean value."
+      },
+      "b": {
+        "type": "_types.Boolean",
+        "description": "The second boolean value."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "return $$args.a && $$args.b;\n"
+      }
+    },
+    "returns": {
+      "type": "_types.Boolean",
+      "description": "The result of the logical AND operation."
+    },
+    "tests": {
+      "andTrueTrue": {
+        "description": "Both input values are true.",
+        "input": {
+          "a": true,
+          "b": true
+        },
+        "expected": true
+      },
+      "andFalseTrue": {
+        "description": "First input value is false, second is true.",
+        "input": {
+          "a": false,
+          "b": true
+        },
+        "expected": false
+      },
+      "andTrueFalse": {
+        "description": "First input value is true, second is false.",
+        "input": {
+          "a": true,
+          "b": false
+        },
+        "expected": false
+      }
+    }
+  },
+  {
+    "define": "_functions.Dictionary.BuildObject",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Builds a new dictionary with the given keys and values.",
+    "parameters": {
+      "data": {
+        "type": "_types.Dictionary",
+        "description": "The dictionary to build from."
+      },
+      "keys": {
+        "type": "_types.List",
+        "description": "The list of keys to select from the input dictionary."
+      },
+      "values": {
+        "type": "_types.List",
+        "description": "The list of values corresponding to the keys."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "const obj = {};\n$$args.keys.forEach((key, index) => {\n  obj[key] = $$args.values[index];\n});\nreturn obj;\n"
+      }
+    },
+    "returns": {
+      "type": "_types.Dictionary",
+      "description": "The new dictionary with the given keys and values."
+    },
+    "tests": {
+      "buildObjectSimple": {
+        "description": "Build a simple object from a list of keys and values.",
+        "input": {
+          "data": {
+            "a": 1,
+            "b": 2,
+            "c": 3
+          },
+          "keys": ["a", "c"],
+          "values": [4, 5]
+        },
+        "expected": {
+          "a": 4,
+          "c": 5
+        }
+      },
+      "buildObjectMultipleKeys": {
+        "description": "Build an object with multiple keys from a list of keys and values.",
+        "input": {
+          "data": {
+            "a": 1,
+            "b": 2,
+            "c": 3,
+            "d": 4,
+            "e": 5
+          },
+          "keys": ["a", "c", "e"],
+          "values": [6, 7, 8]
+        },
+        "expected": {
+          "a": 6,
+          "c": 7,
+          "e": 8
+        }
+      }
+    }
+  },
+  {
+    "define": "_functions.String.CamelCase",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Converts a string to camelCase.",
+    "parameters": {
+      "string": {
+        "type": "_types.String",
+        "description": "The string to convert to camelCase."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "return $$args.string\n  .toLowerCase()\n  .replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase());\n"
+      }
+    },
+    "returns": {
+      "type": "String",
+      "description": "The camelCased string."
+    },
+    "tests": {
+      "camelCaseSingleWord": {
+        "description": "Convert a single word to camelCase.",
+        "input": {
+          "string": "hello"
+        },
+        "expected": "hello"
+      },
+      "camelCaseMultipleWords": {
+        "description": "Convert multiple words to camelCase.",
+        "input": {
+          "string": "hello world"
+        },
+        "expected": "helloWorld"
+      },
+      "camelCaseWithUnderscores": {
+        "description": "Convert a string with underscores to camelCase.",
+        "input": {
+          "string": "hello_world_test"
+        },
+        "expected": "helloWorldTest"
+      }
+    }
+  },
+  {
+    "define": "_functions.Math.Ceil",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Rounds a number up to the nearest integer.",
+    "parameters": {
+      "value": {
+        "type": "_types.Number",
+        "description": "The number to ceil."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "return Math.ceil($$args.value);\n"
+      }
+    },
+    "returns": {
+      "type": "_types.Number",
+      "description": "The ceiling of the input value."
+    },
+    "tests": {
+      "ceilZero": {
+        "description": "Ceil the number 0.",
+        "input": {
+          "value": 0
+        },
+        "expected": 0
+      },
+      "ceilOnePointFive": {
+        "description": "Ceil the number 1.5.",
+        "input": {
+          "value": 1.5
+        },
+        "expected": 2
+      },
+      "ceilNegativeTwo": {
+        "description": "Ceil the negative number -2.4.",
+        "input": {
+          "value": -2.4
+        },
+        "expected": -2
+      }
+    }
+  },
+  {
+    "define": "_functions.Number.IsGreaterThan",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Check if a number is greater than another number.",
+    "parameters": {
+      "a": {
+        "type": "_types.Number",
+        "description": "The first number to be compared."
+      },
+      "b": {
+        "type": "_types.Number",
+        "description": "The second number to be compared."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "return $$args.a > $$args.b;\n"
+      }
+    },
+    "returns": {
+      "type": "_types.Boolean",
+      "description": "Returns true if a is greater than b, and false otherwise."
+    },
+    "tests": {
+      "greaterThanTest": {
+        "description": "Check if a number is greater than another number.",
+        "input": {
+          "a": 5,
+          "b": 2
+        },
+        "expected": true
+      }
+    }
+  },
+  {
+    "define": "_functions.List.ISEmpty",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Checks if a list is empty.",
+    "parameters": {
+      "input": {
+        "type": "_types.List",
+        "description": "The list to check for emptiness."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "return $$args.input.length === 0;\n"
+      }
+    },
+    "returns": {
+      "type": "_types.Boolean",
+      "description": "Whether the list is empty or not."
+    },
+    "tests": {
+      "isEmptyList": {
+        "description": "Check an empty list.",
+        "input": {
+          "input": []
+        },
+        "expected": true
+      },
+      "nonEmptyList": {
+        "description": "Check a non-empty list.",
+        "input": {
+          "input": ["a", "b"]
+        },
+        "expected": false
+      }
+    }
+  },
+  {
+    "define": "_functions.Object.HasKey",
+    "blueprint": "_blueprint.Flowgraph",
+    "description": "Checks if a key exists in an object.",
+    "parameters": {
+      "value": {
+        "type": "_types.Dictionary",
+        "description": "The object to check."
+      },
+      "key": {
+        "type": "_types.String",
+        "description": "The key to check for."
+      }
+    },
+    "implementation": {
+      "javascript": {
+        "code": "return Object.prototype.hasOwnProperty.call($$args.value, $$args.key);\n"
+      }
+    },
+    "returns": {
+      "type": "_types.Boolean",
+      "description": "True if the key exists in the object, false otherwise."
+    },
+    "tests": {
+      "hasKey": {
+        "description": "Test with a key that exists in the object.",
+        "input": {
+          "value": {
+            "a": 1,
+            "b": 2
+          },
+          "key": "a"
+        },
+        "expected": true
+      },
+      "doesNotHaveKey": {
+        "description": "Test with a key that does not exist in the object.",
+        "input": {
+          "value": {
+            "a": 1,
+            "b": 2
+          },
+          "key": "c"
+        },
+        "expected": false
+      },
+      "emptyObject": {
+        "description": "Test with an empty object.",
+        "input": {
+          "value": {},
+          "key": "a"
+        },
+        "expected": false
+      }
+    }
+  }
+]

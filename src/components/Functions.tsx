@@ -55,23 +55,29 @@ const Functions: React.FC = () => {
         />
       </Box>
       <HStack spacing={0} bg="gray.700" color="white" textAlign="center">
-        <Box flex="1" p={2} borderRight="1px solid #444">
-          #1: Category 1
+        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
+          Math
         </Box>
-        <Box flex="1" p={2} borderRight="1px solid #444">
-          #2: Category 2
+        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
+          String
         </Box>
-        <Box flex="1" p={2} borderRight="1px solid #444">
-          #3: Category 3
+        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
+          Number
         </Box>
-        <Box flex="1" p={2} borderRight="1px solid #444">
-          #4: Category 4
+        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
+          Object
         </Box>
-        <Box flex="1" p={2} borderRight="1px solid #444">
-          #5: Category 5
+        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
+          List
         </Box>
-        <Box flex="1" p={2}>
-          #6: Category 6
+        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
+          Logical
+        </Box>
+        <Box flex="1" p={3} px={5} borderRight="1px solid #444">
+          Dictionary
+        </Box>
+        <Box flex="1" p={3} px={5}>
+          Date
         </Box>
       </HStack>
       <HStack flex="1" spacing={0} align="stretch">

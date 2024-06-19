@@ -32,7 +32,7 @@ const Functions: React.FC = () => {
   );
 
   return (
-    <VStack spacing={0} align="stretch">
+    <VStack spacing={0} align="stretch" height="150vh">
       <Box bg="black" color="white" textAlign="center" p={2} fontSize="lg">
         <Input
           placeholder="Search functions..."
@@ -65,7 +65,7 @@ const Functions: React.FC = () => {
           #6: Category 6
         </Box>
       </HStack>
-      <HStack flex="1" spacing={0}>
+      <HStack flex="1" spacing={0} align="stretch">
         <VStack
           flex="1"
           spacing={0}
@@ -74,15 +74,15 @@ const Functions: React.FC = () => {
           p={2}
           align="stretch"
           overflowY="auto"
-          maxHeight="300px" // Adjust this height as needed
+          maxHeight="320px" // Adjust this height as needed
         >
           {Object.keys(filteredFunctions).length > 0 ? (
             Object.keys(filteredFunctions).map((type) => (
               <React.Fragment key={type}>
-                <Text fontWeight="bold" mb={2}>
+                <Text fontWeight="bold" mb={2} align="left">
                   {type}
                 </Text>
-                {filteredFunctions[type].map((name, index) => (
+                {filteredFunctions[type].slice(0, 10).map((name, index) => (
                   <Box
                     key={name}
                     p={2}
@@ -105,6 +105,7 @@ const Functions: React.FC = () => {
           color="white"
           p={2}
           align="stretch"
+          maxHeight="320px"
         >
           <Text fontWeight="bold">OVERVIEW: Average</Text>
           <Text>
@@ -120,6 +121,7 @@ const Functions: React.FC = () => {
             color="white"
             borderRadius="0"
             _hover={{ bg: "gray.500" }}
+            mt="auto"
           >
             Use this function
           </Button>

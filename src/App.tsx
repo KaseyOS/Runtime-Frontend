@@ -4,12 +4,13 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import { FlowgraphRuntime } from "yodawg/src/FlowgraphRuntime";
 import functions from "./functions.json";
+import { FlowgraphDeclaration } from "yodawg/src/types";
 
 const fg = new FlowgraphRuntime(
   {
     define: "Test",
-    blueprint: "_blueprints.Flowgraph",
-    functions,
+    blueprint: "_blueprint.Flowgraph",
+    functions: functions as unknown as FlowgraphDeclaration[],
     executionFlow: {
       execute: [
         { declare: "index", type: "_types.Number", value: 0 },
@@ -20,14 +21,14 @@ const fg = new FlowgraphRuntime(
             arguments: { a: "$$variables.index", b: 10 },
           },
           execute: [
-            {
-              call: "_functions.String.Log",
-              arguments: {
-                messages: [
-                  "While loop, index: {{$$variables.index}}, loop iterations: {{$$variables.$$iterations}}",
-                ],
-              },
-            },
+            // {
+            //   call: "_functions.String.Log",
+            //   arguments: {
+            //     messages: [
+            //       "While loop, index: {{$$variables.index}}, loop iterations: {{$$variables.$$iterations}}",
+            //     ],
+            //   },
+            // },
             {
               call: "_functions.Math.Add",
               arguments: { numbers: ["$$variables.index", 1] },
@@ -41,32 +42,36 @@ const fg = new FlowgraphRuntime(
   },
   undefined,
   undefined,
+  undefined,
   { loadCoreFromFs: false }
 );
 
+const getInitialState = (fgRef: FlowgraphRuntime) => ({
+  status: fgRef.state.status,
+  count: 0,
+});
+
 const useFlowgraph = (fg: FlowgraphRuntime) => {
   const fgRef = useRef(fg);
-  const [state, setState] = useState({
-    status: fgRef.current.state.status,
-    count: 0,
-  });
+  const [state, setState] = useState(getInitialState(fgRef.current));
   useEffect(() => {
-    if (fgRef.current.state.status === "notInitialized") {
-      fgRef.current.initialize();
-    }
-  }, []);
-  useEffect(() => {
-    const id = setInterval(() => {
+    const initListener = fgRef.current.on("initialized", () => {
+      setState(getInitialState(fgRef.current));
+    });
+    const cleanupStateChanged = fgRef.current.on("stateChanged", (state) => {
       setState({
-        status: fgRef.current.state.status,
-        count: fgRef.current.hasVariableDeclared("$$variables.index")
-          ? (fgRef.current.getVariable("$$variables.index").state
-              .currentValue as number)
-          : 0,
+        status: state.status,
+        count: (fgRef.current.getVariable("$$variables.index")?.state
+          .currentValue ?? 0) as number,
       });
-    }, 1000);
+    });
+    const cleanupExecListener = fgRef.current.on("reexecution", () => {
+      setState(getInitialState(fgRef.current));
+    });
     return () => {
-      clearInterval(id);
+      initListener();
+      cleanupStateChanged();
+      cleanupExecListener();
     };
   }, []);
   return {
@@ -77,6 +82,8 @@ const useFlowgraph = (fg: FlowgraphRuntime) => {
 
 function App() {
   const { state, fgRef } = useFlowgraph(fg);
+
+  console.log(state);
 
   return (
     <>
@@ -90,13 +97,33 @@ function App() {
       </div>
       <h1>status: {state.status}</h1>
       <div className="card">
-        <button
-          onClick={() => {
-            fgRef.executeToEnd();
-          }}
-        >
-          count is {state.count}
-        </button>
+        {state.status === "notInitialized" && (
+          <button
+            onClick={() => {
+              fgRef.initialize();
+            }}
+          >
+            Initialize
+          </button>
+        )}
+        {state.status === "initialized" && (
+          <button
+            onClick={() => {
+              fgRef.executeToEnd();
+            }}
+          >
+            count is {state.count}
+          </button>
+        )}
+        {state.status === "execution done" && (
+          <button
+            onClick={() => {
+              fgRef.executeToEnd();
+            }}
+          >
+            Re-execute
+          </button>
+        )}
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>

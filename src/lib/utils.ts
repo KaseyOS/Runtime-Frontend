@@ -1,4 +1,4 @@
-import data from "./test.json";
+import data from "./functions.json";
 
 interface FunctionData {
   define: string;

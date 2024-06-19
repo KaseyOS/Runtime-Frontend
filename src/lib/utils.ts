@@ -18,7 +18,6 @@ export const getCategorizedFunctions = (): CategorizedFunctions => {
   const categorizedFunctions: CategorizedFunctions = {};
 
   (data as FunctionData[]).forEach((func) => {
-    // TODO: Remove below line
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, type, name] = func.define.split(".");
     if (!categorizedFunctions[type]) {
@@ -28,4 +27,8 @@ export const getCategorizedFunctions = (): CategorizedFunctions => {
   });
 
   return categorizedFunctions;
+};
+
+export const getData = (): FunctionData[] => {
+  return data as FunctionData[];
 };

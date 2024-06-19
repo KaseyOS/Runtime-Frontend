@@ -8,14 +8,23 @@ import {
   Input,
   Button,
 } from "@chakra-ui/react";
-import { getCategorizedFunctions } from "../lib/utils";
+import { getCategorizedFunctions, getData } from "../lib/utils";
 
 const Functions: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFunction, setSelectedFunction] = useState<{
+    name: string;
+    description: string;
+  } | null>(null);
   const categorizedFunctions = getCategorizedFunctions();
+  const data = getData();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
+
+  const handleFunctionClick = (name: string, description: string) => {
+    setSelectedFunction({ name, description });
   };
 
   const filteredFunctions = Object.keys(categorizedFunctions).reduce(
@@ -82,16 +91,28 @@ const Functions: React.FC = () => {
                 <Text fontWeight="bold" mb={2} align="left">
                   {type}
                 </Text>
-                {filteredFunctions[type].slice(0, 10).map((name, index) => (
-                  <Box
-                    key={name}
-                    p={2}
-                    bg={index % 2 === 1 ? "gray.600" : undefined}
-                    cursor="pointer"
-                  >
-                    {name}
-                  </Box>
-                ))}
+                {filteredFunctions[type].slice(0, 10).map((name, index) => {
+                  const functionData = data.find(
+                    (func) => func.define.split(".").pop() === name
+                  );
+
+                  return (
+                    <Box
+                      key={name}
+                      p={2}
+                      bg={index % 2 === 1 ? "gray.600" : undefined}
+                      cursor="pointer"
+                      onClick={() =>
+                        handleFunctionClick(
+                          name,
+                          functionData?.description || ""
+                        )
+                      }
+                    >
+                      {name}
+                    </Box>
+                  );
+                })}
               </React.Fragment>
             ))
           ) : (
@@ -107,11 +128,12 @@ const Functions: React.FC = () => {
           align="stretch"
           maxHeight="320px"
         >
-          <Text fontWeight="bold">OVERVIEW: Average</Text>
-          <Text>
-            Description lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem
-            ipsum lorem ipsum
+          <Text fontWeight="bold">
+            {selectedFunction
+              ? `OVERVIEW: ${selectedFunction.name}`
+              : "OVERVIEW"}
           </Text>
+          <Text>{selectedFunction ? selectedFunction.description : ""}</Text>
           <Divider borderColor="gray.600" />
           <Text>Examples</Text>
           <Divider borderColor="gray.600" />

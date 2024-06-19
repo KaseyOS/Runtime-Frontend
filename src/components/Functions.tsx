@@ -73,6 +73,8 @@ const Functions: React.FC = () => {
           color="white"
           p={2}
           align="stretch"
+          overflowY="auto"
+          maxHeight="300px" // Adjust this height as needed
         >
           {Object.keys(filteredFunctions).length > 0 ? (
             Object.keys(filteredFunctions).map((type) => (
@@ -113,16 +115,16 @@ const Functions: React.FC = () => {
           <Text>Examples</Text>
           <Divider borderColor="gray.600" />
           <Text>Release notes</Text>
+          <Button
+            bg="gray.600"
+            color="white"
+            borderRadius="0"
+            _hover={{ bg: "gray.500" }}
+          >
+            Use this function
+          </Button>
         </VStack>
       </HStack>
-      <Button
-        bg="gray.600"
-        color="white"
-        borderRadius="0"
-        _hover={{ bg: "gray.500" }}
-      >
-        Use this function
-      </Button>
     </VStack>
   );
 };

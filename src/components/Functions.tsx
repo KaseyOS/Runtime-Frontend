@@ -144,14 +144,23 @@ const Functions: React.FC = () => {
                 <Text fontWeight="bold" mb={2} align="left">
                   {type}
                 </Text>
-                {filteredFunctions[type].slice(0, 10).map((name, index) => {
+                {(searchQuery
+                  ? filteredFunctions[type]
+                  : filteredFunctions[type].slice(0, 10)
+                ).map((name, index) => {
                   const functionData = data.find(
                     (func) => func.define.split(".").pop() === name
                   );
 
-                  const examples = functionData
-                    ? createExamples(name, functionData.tests)
-                    : [];
+                  if (!functionData) return null;
+
+                  let examples: string[];
+
+                  try {
+                    examples = createExamples(name, functionData.tests);
+                  } catch (e) {
+                    return;
+                  }
 
                   return (
                     <Box
@@ -162,7 +171,7 @@ const Functions: React.FC = () => {
                       onClick={() =>
                         handleFunctionClick(
                           name,
-                          functionData?.description || "",
+                          functionData.description,
                           examples
                         )
                       }

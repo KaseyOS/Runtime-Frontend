@@ -61,7 +61,14 @@ const Functions: React.FC = () => {
   );
 
   return (
-    <VStack spacing={0} align="stretch" height="100vh">
+    <VStack
+      spacing={0}
+      align="stretch"
+      height="100vh"
+      width="100vw"
+      maxWidth="1000px"
+      margin="0 auto"
+    >
       <Box bg="black" color="white" textAlign="center" p={2} fontSize="lg">
         <Input
           placeholder="Search functions..."

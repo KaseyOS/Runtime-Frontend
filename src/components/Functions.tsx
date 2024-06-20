@@ -7,6 +7,7 @@ import {
   Divider,
   Input,
   Button,
+  Code,
 } from "@chakra-ui/react";
 import { getCategorizedFunctions, getData, Test } from "../lib/utils";
 
@@ -206,7 +207,9 @@ const Functions: React.FC = () => {
           <Text fontWeight="bold">Examples</Text>
           {selectedFunction ? (
             selectedFunction.examples.map((example, index) => (
-              <Text key={index}>{example}</Text>
+              <Code key={index} colorScheme="whiteAlpha" variant={"subtle"}>
+                {example}
+              </Code>
             ))
           ) : (
             <Text>No examples available.</Text>

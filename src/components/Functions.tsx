@@ -49,9 +49,27 @@ const Functions: React.FC = () => {
 
   const filteredFunctions = Object.keys(categorizedFunctions).reduce(
     (acc, type) => {
-      const filteredNames = categorizedFunctions[type].filter((name) =>
-        name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      let filteredNames = categorizedFunctions[type];
+      const categoryMatch = searchQuery.match(/\[Category:\s*(\w+)\]/i);
+
+      if (categoryMatch) {
+        const category = categoryMatch[1].toLowerCase();
+        if (type.toLowerCase() !== category) {
+          return acc;
+        }
+        filteredNames = filteredNames.filter((name) =>
+          name
+            .toLowerCase()
+            .includes(
+              searchQuery.replace(categoryMatch[0], "").trim().toLowerCase()
+            )
+        );
+      } else {
+        filteredNames = filteredNames.filter((name) =>
+          name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
       if (filteredNames.length > 0) {
         acc[type] = filteredNames;
       }

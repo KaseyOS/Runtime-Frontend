@@ -105,7 +105,7 @@ const Functions: React.FC = () => {
           p={2}
           align="stretch"
           overflowY="auto"
-          maxHeight="320px" // Adjust this height as needed
+          maxHeight="445px"
         >
           {Object.keys(filteredFunctions).length > 0 ? (
             Object.keys(filteredFunctions).map((type) => (
@@ -153,7 +153,8 @@ const Functions: React.FC = () => {
           color="white"
           p={2}
           align="stretch"
-          maxHeight="320px"
+          overflowY="auto"
+          maxHeight="445px"
         >
           <Text fontWeight="bold">
             {selectedFunction

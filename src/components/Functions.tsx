@@ -24,6 +24,10 @@ const Functions: React.FC = () => {
     setSearchQuery(e.target.value);
   };
 
+  const handleCategoryClick = (category: string) => {
+    setSearchQuery(`[Category: ${category}] `);
+  };
+
   const handleFunctionClick = (
     name: string,
     description: string,
@@ -116,6 +120,8 @@ const Functions: React.FC = () => {
             p={3}
             px={5}
             borderRight={index !== 7 ? "1px solid #444" : "none"}
+            cursor="pointer"
+            onClick={() => handleCategoryClick(category)}
           >
             {category}
           </Box>

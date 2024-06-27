@@ -1183,7 +1183,7 @@
     },
     "implementation": {
       "javascript": {
-        "code": "return $$args.string.replace(/\\b\\w/g, char => char.toUpperCase());\n"
+        "code": "console.log($$args);return $$args.string.replace(/\\b\\w/g, char => char.toUpperCase());\n"
       }
     },
     "returns": {

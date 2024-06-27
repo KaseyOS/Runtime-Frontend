@@ -39,8 +39,22 @@ const Functions: React.FC = () => {
 
   const createExamples = (
     functionName: string,
-    tests: { [key: string]: Test } | undefined
+    tests: { [key: string]: Test } | undefined,
+    examples?: {
+      description: string;
+      input: { [key: string]: unknown };
+      expected: unknown;
+    }[]
   ): string[] => {
+    if (examples) {
+      return examples.map((example) => {
+        const inputs = Object.values(example.input)
+          .map((input) => JSON.stringify(input))
+          .join(", ");
+        return `${functionName}(${inputs}) => ${example.expected}`;
+      });
+    }
+
     if (!tests) return [];
 
     return Object.keys(tests).map((key) => {
@@ -155,13 +169,11 @@ const Functions: React.FC = () => {
 
                   if (!functionData) return null;
 
-                  let examples: string[];
-
-                  try {
-                    examples = createExamples(name, functionData.tests);
-                  } catch (e) {
-                    return;
-                  }
+                  const examples = createExamples(
+                    name,
+                    functionData.tests,
+                    functionData.examples
+                  );
 
                   return (
                     <Box

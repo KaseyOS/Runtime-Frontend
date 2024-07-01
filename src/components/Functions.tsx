@@ -55,7 +55,7 @@ const Functions = ({
     examples: string[],
     id: string
   ) => {
-    setSelectedFunction({ name, description, examples });
+    setSelectedFunction({ name, description, examples, id });
   };
 
   const createExamples = (

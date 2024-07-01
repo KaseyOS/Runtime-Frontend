@@ -112,9 +112,9 @@ const useFlowgraph = (fg: FlowgraphRuntime) => {
     const cleanupStateChanged = fgRef.current.on("stateChanged", (state) => {
       setState({
         status: state.status,
-        output: fgRef.current.hasOutput()
-          ? (fgRef.current.getOutput() as string)
-          : "",
+        output:
+          (fgRef.current.getVariable("$$variables.$$returns")?.state
+            .currentValue as string) ?? "",
       });
     });
     const cleanupExecListener = fgRef.current.on("reexecution", () => {

@@ -8,54 +8,54 @@ import functions from "../lib/functions.json";
 import { createExamples } from "./Functions";
 import { getFunctionName } from "../lib/utils";
 
-const useExecuteFlowgraph = (declaration: FlowgraphDeclaration) => {
-  // console.log(
-  //   flowgraphDeclarationToFlowgraphDeclarationWithExecutionFlow(
-  //     "javascript",
-  //     declaration,
-  //     {}
-  //   )
-  // );
-  const fgRef = useRef<FlowgraphRuntime>(
-    new FlowgraphRuntime(
-      flowgraphDeclarationToFlowgraphDeclarationWithExecutionFlow(
-        "javascript",
-        declaration,
-        {}
-      ),
-      undefined,
-      undefined,
-      undefined,
-      { loadCoreFromFs: false }
-    )
-  );
-  const [state, setState] = useState(fgRef.current.state);
-  const [output, setOutput] = useState<unknown | null>(null);
+// const useExecuteFlowgraph = (declaration: FlowgraphDeclaration) => {
+//   // console.log(
+//   //   flowgraphDeclarationToFlowgraphDeclarationWithExecutionFlow(
+//   //     "javascript",
+//   //     declaration,
+//   //     {}
+//   //   )
+//   // );
+//   const fgRef = useRef<FlowgraphRuntime>(
+//     new FlowgraphRuntime(
+//       flowgraphDeclarationToFlowgraphDeclarationWithExecutionFlow(
+//         "javascript",
+//         declaration,
+//         {}
+//       ),
+//       undefined,
+//       undefined,
+//       undefined,
+//       { loadCoreFromFs: false }
+//     )
+//   );
+//   const [state, setState] = useState(fgRef.current.state);
+//   const [output, setOutput] = useState<unknown | null>(null);
 
-  useEffect(() => {
-    fgRef.current.initialize();
-  }, []);
-  useEffect(() => {
-    const initListener = fgRef.current.on("initialized", (state) => {
-      setState(state);
-    });
-    const stateChangedListener = fgRef.current.on("stateChanged", (state) => {
-      setState(state);
-      setOutput(
-        fgRef.current.getVariable("$$variables.$$returns")?.state.currentValue
-      );
-    });
-    return () => {
-      initListener();
-      stateChangedListener();
-    };
-  }, []);
-  return {
-    state,
-    output,
-    fgRef: fgRef.current,
-  };
-};
+//   useEffect(() => {
+//     fgRef.current.initialize();
+//   }, []);
+//   useEffect(() => {
+//     const initListener = fgRef.current.on("initialized", (state) => {
+//       setState(state);
+//     });
+//     const stateChangedListener = fgRef.current.on("stateChanged", (state) => {
+//       setState(state);
+//       setOutput(
+//         fgRef.current.getVariable("$$variables.$$returns")?.state.currentValue
+//       );
+//     });
+//     return () => {
+//       initListener();
+//       stateChangedListener();
+//     };
+//   }, []);
+//   return {
+//     state,
+//     output,
+//     fgRef: fgRef.current,
+//   };
+// };
 
 const fg = new FlowgraphRuntime(
   {
@@ -112,8 +112,9 @@ const useFlowgraph = (fg: FlowgraphRuntime) => {
     const cleanupStateChanged = fgRef.current.on("stateChanged", (state) => {
       setState({
         status: state.status,
-        output: fgRef.current.getVariable("$$variables.$$returns")?.state
-          .currentValue as string,
+        output: fgRef.current.hasOutput()
+          ? (fgRef.current.getOutput() as string)
+          : "",
       });
     });
     const cleanupExecListener = fgRef.current.on("reexecution", () => {
@@ -231,6 +232,7 @@ function ArgsInputRenderer({
   setValues: (key: string, value: string) => void;
 }) {
   const parameters = declaration.parameters;
+  console.log(parameters);
   if (parameters) {
     return (
       <Box>

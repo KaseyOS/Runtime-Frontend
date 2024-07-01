@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import data from "./functions.json";
+
 export interface FunctionData {
   define: string;
   blueprint: string;
@@ -9,9 +10,16 @@ export interface FunctionData {
   implementation: object;
   returns: object;
   tests: { [key: string]: Test };
+  examples?: Example[];
 }
 
 export interface Test {
+  description: string;
+  input: { [key: string]: any };
+  expected: any;
+}
+
+export interface Example {
   description: string;
   input: { [key: string]: any };
   expected: any;

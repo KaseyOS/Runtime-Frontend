@@ -55,7 +55,36 @@ const Functions = ({
     examples: string[],
     id: string
   ) => {
-    setSelectedFunction({ name, description, examples, id });
+    setSelectedFunction({ name, description, examples });
+  };
+
+  const createExamples = (
+    functionName: string,
+    tests: { [key: string]: Test } | undefined,
+    examples?: {
+      description: string;
+      input: { [key: string]: unknown };
+      expected: unknown;
+    }[]
+  ): string[] => {
+    if (examples) {
+      return examples.map((example) => {
+        const inputs = Object.values(example.input)
+          .map((input) => JSON.stringify(input))
+          .join(", ");
+        return `${functionName}(${inputs}) => ${example.expected}`;
+      });
+    }
+
+    if (!tests) return [];
+
+    return Object.keys(tests).map((key) => {
+      const test = tests[key];
+      const inputs = Object.values(test.input)
+        .map((input) => JSON.stringify(input))
+        .join(", ");
+      return `${functionName}(${inputs}) => ${test.expected}`;
+    });
   };
 
   const filteredFunctions = Object.keys(categorizedFunctions).reduce(
@@ -154,13 +183,11 @@ const Functions = ({
 
                   if (!functionData) return null;
 
-                  let examples: string[];
-
-                  try {
-                    examples = createExamples(name, functionData.tests);
-                  } catch (e) {
-                    return;
-                  }
+                  const examples = createExamples(
+                    name,
+                    functionData.tests,
+                    functionData.examples
+                  );
 
                   return (
                     <Box

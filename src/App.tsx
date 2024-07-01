@@ -3,28 +3,28 @@ import "./App.css";
 import {
   Box,
   Button,
+  Divider,
   Flex,
   FormControl,
   FormLabel,
-  Heading,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Select,
+  Switch,
   Text,
   Textarea,
   VStack,
-  useDisclosure,
 } from "@chakra-ui/react";
-import Functions from "./components/Functions";
-import type { FlowgraphDeclaration } from "yodawg/src/types";
+import {
+  ExecutionDeclaration,
+  FlowgraphDeclarationWithExecutionFlow,
+  VariableDeclaration,
+  isVariableDeclareExecutionDeclaration,
+  type DataType,
+  type FlowgraphDeclaration,
+} from "yodawg/src/types";
 import functions from "./lib/functions.json";
-import { FunctionRenderer } from "./components/FunctionRenderer";
-import { PlusSquareIcon } from "@chakra-ui/icons";
+import { flowgraphDeclarationToFlowgraphDeclarationWithExecutionFlow } from "yodawg/src/utils";
+import { FlowgraphRuntime } from "yodawg/src/FlowgraphRuntime";
 
 export const FunctionsContext = createContext<FlowgraphDeclaration[]>([]);
 type Directive =
@@ -37,16 +37,18 @@ type Directive =
   | "whileLoop";
 
 function App() {
-  const [funcId, setFuncId] = useState<string | null>(null);
-  const modalController = useDisclosure();
-  const [declaration, setDeclaration] = useState({
-    name: "",
-    description: "",
-    executionFlow: {
-      execute: [],
-      return: "",
-    },
-  });
+  // const [funcId, setFuncId] = useState<string | null>(null);
+  // const modalController = useDisclosure();
+  const [declaration, setDeclaration] =
+    useState<FlowgraphDeclarationWithExecutionFlow>({
+      define: "",
+      description: "",
+      blueprint: "_blueprint.Flowgraph",
+      executionFlow: {
+        execute: [],
+        return: "",
+      },
+    });
 
   return (
     <>
@@ -65,11 +67,11 @@ function App() {
               <FormLabel htmlFor="name">Flowgraph name</FormLabel>
               <Input
                 id="name"
-                name="name"
+                name="define"
                 onChange={(e) =>
                   setDeclaration((dec) => ({
                     ...dec,
-                    name: e.target.value,
+                    define: e.target.value,
                   }))
                 }
               />
@@ -106,20 +108,7 @@ function App() {
                 }
               />
             </FormControl>
-            <Box>
-              <Text>Execution plan</Text>
-              {/* List of created steps */}
-              <VStack>
-                {declaration.executionFlow.execute.map((step, index) =>
-                  "declare" in step ? (
-                    <DeclareVariableStep
-                      index={index}
-                      declaration={declaration}
-                      setDeclaration={setDeclaration}
-                    />
-                  ) : null
-                )}
-              </VStack>
+            <Box as={VStack} spacing="4" alignItems="start">
               {/* Create a new step */}
               <NewStep
                 onCommit={(step) => {
@@ -132,11 +121,57 @@ function App() {
                   }));
                 }}
               />
+              <Divider />
+              {/* List of created steps */}
+              <Text>Execution plan</Text>
+              <VStack>
+                {declaration.executionFlow.execute.map((step, index) =>
+                  isVariableDeclareExecutionDeclaration(step) ? (
+                    <DeclareVariableStep
+                      key={index}
+                      step={step}
+                      onChange={(newStep) => {
+                        setDeclaration((dec) => ({
+                          ...dec,
+                          executionFlow: {
+                            ...dec.executionFlow,
+                            execute: [
+                              ...dec.executionFlow.execute.slice(0, index),
+                              newStep,
+                              ...dec.executionFlow.execute.slice(index + 1),
+                            ],
+                          },
+                        }));
+                      }}
+                    />
+                  ) : null
+                )}
+              </VStack>
             </Box>
           </Box>
           <Box textAlign="start">
             <Text>Declaration</Text>
             <pre>{JSON.stringify(declaration, null, 2)}</pre>
+            <Button
+              onClick={async () => {
+                const fg = new FlowgraphRuntime(
+                  flowgraphDeclarationToFlowgraphDeclarationWithExecutionFlow(
+                    "javascript",
+                    declaration,
+                    {}
+                  ),
+                  undefined,
+                  undefined,
+                  undefined,
+                  { loadCoreFromFs: false }
+                );
+                await fg.initialize();
+                await fg.executeToEnd();
+                console.log(fg.getOutput());
+              }}
+            >
+              Execute
+            </Button>
           </Box>
         </Flex>
 
@@ -172,7 +207,7 @@ function App() {
 
 export default App;
 
-function NewStep({ onCommit }: { onCommit(step: unknown): void }) {
+function NewStep({ onCommit }: { onCommit(step: ExecutionDeclaration): void }) {
   const [nextStepType, setNextStepType] =
     useState<Directive>("declareVariable");
   return (
@@ -191,10 +226,11 @@ function NewStep({ onCommit }: { onCommit(step: unknown): void }) {
       </Select>
       {nextStepType === "declareVariable" && (
         <DeclareNewVariable
-          onCommit={({ name, initialValue }) => {
+          onCommit={({ name, initialValue, type }) => {
             onCommit({
               declare: name,
               value: initialValue,
+              type,
             });
           }}
         />
@@ -204,15 +240,11 @@ function NewStep({ onCommit }: { onCommit(step: unknown): void }) {
 }
 
 function DeclareVariableStep({
-  index,
-  declaration,
-  setDeclaration,
+  step,
+  onChange,
 }: {
-  index: number;
-  declaration: Record<string, unknown>;
-  setDeclaration: (
-    cb: (declaration: Record<string, unknown>) => Record<string, unknown>
-  ) => void;
+  step: VariableDeclaration;
+  onChange(newStep: VariableDeclaration): void;
 }) {
   return (
     <VStack
@@ -227,45 +259,73 @@ function DeclareVariableStep({
         <Input
           id="variableName"
           name="variableName"
-          value={declaration.executionFlow.execute[index].name}
+          value={step.declare}
           onChange={(e) => {
-            setDeclaration((dec) => ({
-              ...dec,
-              executionFlow: {
-                ...dec.executionFlow,
-                execute: [
-                  ...dec.executionFlow.execute.slice(0, index),
-                  { ...dec.executionFlow.execute[index], name: e.target.value },
-                  ...dec.executionFlow.execute.slice(index + 1),
-                ],
-              },
-            }));
+            onChange({
+              ...step,
+              declare: e.target.value,
+            });
           }}
         />
       </FormControl>
       <FormControl>
-        <FormLabel htmlFor="initialValue">Initial value</FormLabel>
-        <Input
-          id="initialValue"
-          name="initialValue"
-          value={declaration.executionFlow.execute[index].initialValue}
+        <FormLabel htmlFor="type">Type</FormLabel>
+        <Select
+          value={step.type}
           onChange={(e) => {
-            setDeclaration((dec) => ({
-              ...dec,
-              executionFlow: {
-                ...dec.executionFlow,
-                execute: [
-                  ...dec.executionFlow.execute.slice(0, index),
-                  {
-                    ...dec.executionFlow.execute[index],
-                    initialValue: e.target.value,
-                  },
-                  ...dec.executionFlow.execute.slice(index + 1),
-                ],
-              },
-            }));
+            onChange({
+              ...step,
+              type: e.target.value as DataType,
+            });
           }}
-        />
+        >
+          <option value="_types.String">String</option>
+          <option value="_types.Number">Number</option>
+          <option value="_types.Boolean">Boolean</option>
+        </Select>
+      </FormControl>
+      <FormControl>
+        <FormLabel htmlFor="initialValue">Initial value</FormLabel>
+        {step.type === "_types.String" && (
+          <Input
+            id="initialValue"
+            name="initialValue"
+            value={step.value as string}
+            onChange={(e) => {
+              onChange({
+                ...step,
+                value: e.target.value,
+              });
+            }}
+          />
+        )}
+        {step.type === "_types.Number" && (
+          <Input
+            id="initialValue"
+            name="initialValue"
+            type="number"
+            value={step.value as number}
+            onChange={(e) => {
+              onChange({
+                ...step,
+                value: e.target.valueAsNumber ?? 0,
+              });
+            }}
+          />
+        )}
+        {step.type === "_types.Boolean" && (
+          <Switch
+            id="initialValue"
+            name="initialValue"
+            defaultChecked={step.value as boolean}
+            onChange={(e) => {
+              onChange({
+                ...step,
+                value: e.target.checked,
+              });
+            }}
+          />
+        )}
       </FormControl>
     </VStack>
   );
@@ -274,12 +334,18 @@ function DeclareVariableStep({
 function DeclareNewVariable({
   onCommit,
 }: {
-  onCommit(step: { name: string; initialValue: unknown }): void;
+  onCommit(step: { name: string; initialValue: unknown; type: DataType }): void;
 }) {
-  const [state, setState] = useState({
+  const initialState = {
     name: "",
     initialValue: "",
-  });
+    type: "_types.String" as DataType,
+  };
+  const [state, setState] = useState<{
+    name: string;
+    initialValue: string | number | boolean;
+    type: DataType;
+  }>(initialState);
   return (
     <VStack
       spacing="4"
@@ -298,19 +364,70 @@ function DeclareNewVariable({
         />
       </FormControl>
       <FormControl>
+        <FormLabel htmlFor="type">Type</FormLabel>
+        <Select
+          value={state.type}
+          onChange={(e) => {
+            setState({
+              ...state,
+              type: e.target.value as DataType,
+            });
+          }}
+        >
+          <option value="_types.String">String</option>
+          <option value="_types.Number">Number</option>
+          <option value="_types.Boolean">Boolean</option>
+        </Select>
+      </FormControl>
+      <FormControl>
         <FormLabel htmlFor="initialValue">Initial value</FormLabel>
-        <Input
-          id="initialValue"
-          name="initialValue"
-          value={state.initialValue}
-          onChange={(e) => setState({ ...state, initialValue: e.target.value })}
-        />
+        {state.type === "_types.String" && (
+          <Input
+            id="initialValue"
+            name="initialValue"
+            value={state.initialValue as string}
+            onChange={(e) => {
+              setState({
+                ...state,
+                initialValue: e.target.value,
+              });
+            }}
+          />
+        )}
+        {state.type === "_types.Number" && (
+          <Input
+            id="initialValue"
+            name="initialValue"
+            value={state.initialValue as number}
+            type="number"
+            onChange={(e) => {
+              setState({
+                ...state,
+                initialValue: e.target.valueAsNumber,
+              });
+            }}
+          />
+        )}
+        {state.type === "_types.Boolean" && (
+          <Switch
+            id="initialValue"
+            name="initialValue"
+            checked={state.initialValue as boolean}
+            onChange={(e) => {
+              setState({
+                ...state,
+                initialValue: e.target.checked,
+              });
+            }}
+          />
+        )}
       </FormControl>
       <Button
         colorScheme="blue"
         size="sm"
         onClick={() => {
           onCommit(state);
+          setState(initialState);
         }}
       >
         Add

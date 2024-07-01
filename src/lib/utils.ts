@@ -46,3 +46,7 @@ export const getCategorizedFunctions = (): CategorizedFunctions => {
 export const getData = (): FunctionData[] => {
   return data as unknown as FunctionData[];
 };
+
+export function getFunctionName(define: string): string {
+  return define.split(".").pop()!;
+}

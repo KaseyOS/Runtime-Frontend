@@ -11,12 +11,32 @@ import {
 } from "@chakra-ui/react";
 import { getCategorizedFunctions, getData, Test } from "../lib/utils";
 
-const Functions: React.FC = () => {
+export const createExamples = (
+  functionName: string,
+  tests: { [key: string]: Test } | undefined
+): string[] => {
+  if (!tests) return [];
+
+  return Object.keys(tests).map((key) => {
+    const test = tests[key];
+    const inputs = Object.values(test.input)
+      .map((input) => JSON.stringify(input))
+      .join(", ");
+    return `${functionName}(${inputs}) => ${test.expected}`;
+  });
+};
+
+const Functions = ({
+  onSelectFunction,
+}: {
+  onSelectFunction: (id: string) => void;
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFunction, setSelectedFunction] = useState<{
     name: string;
     description: string;
     examples: string[];
+    id: string;
   } | null>(null);
   const categorizedFunctions = getCategorizedFunctions();
   const data = getData();
@@ -32,9 +52,10 @@ const Functions: React.FC = () => {
   const handleFunctionClick = (
     name: string,
     description: string,
-    examples: string[]
+    examples: string[],
+    id: string
   ) => {
-    setSelectedFunction({ name, description, examples });
+    setSelectedFunction({ name, description, examples, id });
   };
 
   const createExamples = (
@@ -98,14 +119,7 @@ const Functions: React.FC = () => {
   );
 
   return (
-    <VStack
-      spacing={0}
-      align="stretch"
-      height="100vh"
-      width="100vw"
-      maxWidth="1000px"
-      margin="0 auto"
-    >
+    <VStack spacing={0} align="stretch">
       <Box bg="black" color="white" textAlign="center" p={2} fontSize="lg">
         <Input
           placeholder="Search functions..."
@@ -179,13 +193,25 @@ const Functions: React.FC = () => {
                     <Box
                       key={name}
                       p={2}
-                      bg={index % 2 === 1 ? "gray.600" : undefined}
+                      bg={
+                        selectedFunction?.id === functionData.define
+                          ? "green.400"
+                          : index % 2 === 1
+                          ? "gray.600"
+                          : undefined
+                      }
                       cursor="pointer"
+                      _hover={
+                        selectedFunction?.id !== functionData.define
+                          ? { bg: "red.400" }
+                          : undefined
+                      }
                       onClick={() =>
                         handleFunctionClick(
                           name,
                           functionData.description,
-                          examples
+                          examples,
+                          functionData.define
                         )
                       }
                     >
@@ -233,6 +259,11 @@ const Functions: React.FC = () => {
             borderRadius="0"
             _hover={{ bg: "gray.500" }}
             mt="auto"
+            onClick={() => {
+              if (selectedFunction) {
+                onSelectFunction(selectedFunction.id);
+              }
+            }}
           >
             Use this function
           </Button>

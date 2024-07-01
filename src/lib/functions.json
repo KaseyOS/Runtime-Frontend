@@ -9118,19 +9118,8 @@
     "description": "Extracts a portion of a list or string.",
     "parameters": {
       "input": {
-        "type": "_types.Union",
-        "description": "The list or string to slice.",
-        "options": [
-          {
-            "type": "_types.List",
-            "items": {
-              "type": "_types.Unknown"
-            }
-          },
-          {
-            "type": "_types.String"
-          }
-        ]
+        "type": "_types.String",
+        "description": "The string to slice."
       },
       "start": {
         "type": "_types.Number",
@@ -9790,42 +9779,6 @@
           "substring": ""
         },
         "expected": true
-      }
-    }
-  },
-  {
-    "define": "_functions.String.Upper",
-    "blueprint": "_blueprint.Flowgraph",
-    "description": "Converts a given string to uppercase.",
-    "parameters": {
-      "text": {
-        "type": "_types.String",
-        "description": "The input string to convert to uppercase."
-      }
-    },
-    "implementation": {
-      "javascript": {
-        "code": "return $$args.text.toUpperCase();\n"
-      }
-    },
-    "returns": {
-      "type": "_types.String",
-      "description": "The input string converted to uppercase."
-    },
-    "tests": {
-      "upperSimple": {
-        "description": "Convert a simple string to uppercase.",
-        "input": {
-          "text": "hello"
-        },
-        "expected": "HELLO"
-      },
-      "upperMultiWord": {
-        "description": "Convert a multi-word string to uppercase.",
-        "input": {
-          "text": "hello world"
-        },
-        "expected": "HELLO WORLD"
       }
     }
   },
